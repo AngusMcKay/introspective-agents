@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "introspective-agent"
+version = "0.2.0"
+description = "A LangGraph agent that answers practical questions from a document knowledge base over MCP and labels each claim by how well it is supported"
+requires-python = ">=3.11"
+dependencies = [
+    "langgraph>=0.3",
+    "mcp>=2.3,<3",          # v2 SDK: MCPServer (was FastMCP in v1)
+    "openai>=1.50",         # OpenAI-compatible client, pointed at the LiteLLM gateway
+    "pydantic>=2.7",
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6", "anyio>=4"]
+gateway = ["litellm[proxy]"]   # only if you run the gateway outside Docker
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"introspective_agent.mcp_server" = ["sample_docs/*.md"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]

@@ -1,0 +1,41 @@
+# Three services, each with one responsibility:
+#   gateway : model access (keys, routing, fallback, cost logging)
+#   mcp     : tools and documents (a shared capability other agents could also use)
+#   api     : the agent application
+#
+#   cp .env.example .env   # add your key
+#   docker compose up --build
+#   curl -s localhost:8000/ask -H 'content-type: application/json' \
+#     -d '{"question":"My FX-28 boiler shows F22. What do I do?"}' | jq -r .rendered
+#
+# To use your own documents, uncomment the volume and DOCS_DIR lines under mcp.
+
+services:
+  gateway:
+    image: ghcr.io/berriai/litellm:main-stable
+    command: ["--config", "/app/config.yaml", "--port", "4000"]
+    volumes:
+      - ./gateway/litellm_config.yaml:/app/config.yaml:ro
+    env_file: .env
+    ports: ["4000:4000"]
+
+  mcp:
+    build: .
+    command: ["python", "-m", "introspective_agent.mcp_server", "--transport", "http",
+              "--host", "0.0.0.0", "--port", "8001", "--allowed-host", "mcp:8001", "--allowed-host", "localhost:8001"]
+    # volumes:
+    #   - ~/manuals:/docs:ro
+    # environment:
+    #   DOCS_DIR: /docs
+    ports: ["8001:8001"]
+
+  api:
+    build: .
+    environment:
+      GATEWAY_URL: http://gateway:4000
+      MCP_URL: http://mcp:8001/mcp
+    env_file: .env
+    volumes:
+      - ./traces:/app/traces
+    ports: ["8000:8000"]
+    depends_on: [gateway, mcp]

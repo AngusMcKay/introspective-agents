@@ -1,0 +1,42 @@
+# LiteLLM proxy = the model gateway.
+#
+# The agent asks for "agent-model" or "judge-model". This file decides what those
+# aliases mean. Changing provider, adding a fallback, or putting a cheaper model on the
+# judge is a config change here, with no agent code touched. That separation is the
+# point of a gateway: central control of keys, routing, cost, rate limits and logging
+# for every AI application in an organisation.
+#
+# Docs: https://docs.litellm.ai/docs/proxy/configs  (check current syntax; it evolves)
+
+model_list:
+  - model_name: agent-model
+    litellm_params:
+      model: anthropic/claude-sonnet-5-5
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  - model_name: judge-model
+    litellm_params:
+      model: anthropic/claude-haiku-5-5
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  # Alternatives: uncomment and point the alias at whichever you have access to.
+  # - model_name: agent-model
+  #   litellm_params:
+  #     model: openai/<model-name>
+  #     api_key: os.environ/OPENAI_API_KEY
+  # - model_name: agent-model
+  #   litellm_params:
+  #     model: bedrock/<bedrock-model-id>        # NatWest's stack; uses AWS credentials
+  #     aws_region_name: eu-west-2
+
+router_settings:
+  # If agent-model errors (outage, rate limit), retry on judge-model.
+  fallbacks: [{"agent-model": ["judge-model"]}]
+  num_retries: 2
+
+litellm_settings:
+  drop_params: true          # silently drop params a provider doesn't support
+  request_timeout: 60
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY   # the agent's GATEWAY_KEY must match
