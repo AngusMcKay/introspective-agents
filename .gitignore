@@ -2,3 +2,5 @@
 personal*
 .env
 *pycache*
+.venv/
+traces/
