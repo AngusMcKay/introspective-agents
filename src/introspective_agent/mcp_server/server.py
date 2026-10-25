@@ -12,11 +12,11 @@ Run it on its own:
 
 Written against the MCP Python SDK v2 (`MCPServer`; in v1 this class was `FastMCP`).
 
-Design notes worth knowing for an interview:
+Design notes:
   * Tools are narrow and parameterised. `read_document` takes a document ID from the
     index, never a file path, so a model (or an injected instruction) can't make it
     read arbitrary files. See `_resolve_doc`.
-  * Deliberate input errors raise `ToolInputError` (a ToolError), whose message goes
+  * Input errors raise `ToolInputError` (a ToolError), whose message goes
     back to the client so the agent can correct itself. Any other exception reaches the
     client only as a generic error, so internals don't leak.
   * Retrieved text is untrusted. A document could contain "ignore your instructions".

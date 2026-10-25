@@ -19,14 +19,14 @@ model_list:
       model: anthropic/claude-haiku-5-5
       api_key: os.environ/ANTHROPIC_API_KEY
 
-  # Alternatives: uncomment and point the alias at whichever you have access to.
+  # Alternatives:
   # - model_name: agent-model
   #   litellm_params:
   #     model: openai/<model-name>
   #     api_key: os.environ/OPENAI_API_KEY
   # - model_name: agent-model
   #   litellm_params:
-  #     model: bedrock/<bedrock-model-id>        # NatWest's stack; uses AWS credentials
+  #     model: bedrock/<bedrock-model-id>
   #     aws_region_name: eu-west-2
 
 router_settings:

@@ -1,2 +1,4 @@
 *.zip
 personal*
+.env
+*pycache*
